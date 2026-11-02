@@ -1,0 +1,54 @@
+boilerplate:
+  - name: dotnet-api
+    description: ASP.NET Core Web API project using the Features/{Feature}/{UseCase} layout
+    variables_schema:
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: Project and root namespace, for example Orders.Api
+      required:
+        - projectName
+      additionalProperties: false
+    includes:
+      - "boilerplate/Api.csproj.liquid->{{ projectName }}.csproj"
+      - "boilerplate/Program.cs.liquid->Program.cs"
+
+features:
+  - name: add-use-case
+    description: Add a use case (handler, request, response, validator, mapper, handler test) to a feature, and optionally the feature controller
+    variables_schema:
+      type: object
+      properties:
+        rootNamespace:
+          type: string
+          description: Root namespace of the project, for example Orders.Api
+        feature:
+          type: string
+          description: PascalCase feature name, for example Orders
+        useCase:
+          type: string
+          description: PascalCase use case name, for example CreateOrder
+        withController:
+          type: boolean
+          description: Also create the feature controller. Only true for the first use case of a feature
+      required:
+        - rootNamespace
+        - feature
+        - useCase
+      additionalProperties: false
+    includes:
+      - "features/IHandler.cs.liquid->Features/{{ feature }}/{{ useCase }}/I{{ useCase }}Handler.cs"
+      - "features/Handler.cs.liquid->Features/{{ feature }}/{{ useCase }}/{{ useCase }}Handler.cs"
+      - "features/Request.cs.liquid->Features/{{ feature }}/{{ useCase }}/{{ useCase }}Request.cs"
+      - "features/Response.cs.liquid->Features/{{ feature }}/{{ useCase }}/{{ useCase }}Response.cs"
+      - "features/Validator.cs.liquid->Features/{{ feature }}/{{ useCase }}/{{ useCase }}Validator.cs"
+      - "features/Mapper.cs.liquid->Features/{{ feature }}/{{ useCase }}/{{ useCase }}Mapper.cs"
+      - "features/Controller.cs.liquid->Features/{{ feature }}/{{ feature }}Controller.cs?withController=true"
+      - "features/HandlerTests.cs.liquid->Tests/Features/{{ feature }}/{{ useCase }}HandlerTests.cs"
+
+exclude:
+  - "**/*.csproj"
+  - "**/Program.cs"
+  - "**/appsettings*.json"
+  - "**/*.md"

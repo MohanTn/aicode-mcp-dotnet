@@ -1,0 +1,82 @@
+version: "1.0"
+template: dotnet-api
+description: Coding rules for ASP.NET Core APIs using the Features/{Feature}/{UseCase} layout
+rules:
+  - pattern: csharp-general
+    description: Language rules for every C# file
+    must_do:
+      - rule: Keep nullable reference types enabled and fix null warnings properly
+      - rule: Make every async method take and pass a CancellationToken
+      - rule: Put one public type in each file and name the file after the type
+    must_not_do:
+      - rule: Use the ! null-forgiving operator to silence a warning
+      - rule: Call .Result or .Wait() on a task
+    should_do:
+      - rule: Use records for DTOs and classes for entities and services
+      - rule: Use var only when the type is obvious from the right hand side
+
+  - pattern: controller
+    globs:
+      - "Features/**/*Controller.cs"
+    description: Thin controllers
+    inherits:
+      - csharp-general
+    must_do:
+      - rule: Only validate input, call a handler, and translate the result to a status code
+    must_not_do:
+      - rule: Put business logic in a controller
+      - rule: Depend on a concrete infrastructure type such as a repository class or DbContext
+
+  - pattern: handler
+    globs:
+      - "Features/**/*Handler.cs"
+      - "!Features/**/I*Handler.cs"
+    description: Use case handlers
+    inherits:
+      - csharp-general
+    must_do:
+      - rule: Depend on interfaces and take them through the constructor, stored in private readonly fields
+      - rule: Throw domain-specific exceptions and catch only what you can handle
+    must_not_do:
+      - rule: Depend on concrete infrastructure types
+      - rule: Return a domain entity. Map it to a response record
+
+  - pattern: dto
+    globs:
+      - "Features/**/*Request.cs"
+      - "Features/**/*Response.cs"
+    description: Wire types
+    inherits:
+      - csharp-general
+    must_do:
+      - rule: Declare the type as a record
+    must_not_do:
+      - rule: Reference a domain entity from a request or response
+
+  - pattern: repository
+    globs:
+      - "Infrastructure/Repositories/**/*.cs"
+    description: Data access
+    inherits:
+      - csharp-general
+    must_do:
+      - rule: Implement an I{Entity}Repository interface that lives next to it
+
+  - pattern: domain
+    globs:
+      - "Domain/**/*.cs"
+    description: Domain models
+    inherits:
+      - csharp-general
+    must_not_do:
+      - rule: Use EF Core or ASP.NET attributes on domain types
+
+  - pattern: tests
+    globs:
+      - "Tests/**/*.cs"
+    description: Tests mirror the source path
+    inherits:
+      - csharp-general
+    must_do:
+      - rule: Follow Arrange, Act, Assert and test one behavior per test
+      - rule: Mock only the interfaces the handler depends on

@@ -1,0 +1,10 @@
+namespace {{ rootNamespace }}.Features.{{ feature }}.{{ useCase }};
+
+public class {{ useCase }}Handler : I{{ useCase }}Handler
+{
+    // Business logic lives here. Take dependencies as interfaces through the constructor.
+    public Task<{{ useCase }}Response> HandleAsync({{ useCase }}Request request, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+}

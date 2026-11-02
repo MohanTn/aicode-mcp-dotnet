@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Aicode.Mcp.Core/Aicode.Mcp.Core.csproj" />
+    <Project Path="src/Aicode.Mcp.Servers/Aicode.Mcp.Servers.csproj" />
+    <Project Path="src/Aicode.Mcp.Cli/Aicode.Mcp.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Aicode.Mcp.Tests/Aicode.Mcp.Tests.csproj" />
+  </Folder>
+</Solution>

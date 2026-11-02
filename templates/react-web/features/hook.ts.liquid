@@ -1,0 +1,7 @@
+import { text } from '../../I18n';
+import type { {{ componentName | pascalCase }}Props } from './types';
+
+// Data fetching and business logic belong here. page.tsx stays markup and wiring.
+export function use{{ componentName | pascalCase }}(_props: {{ componentName | pascalCase }}Props) {
+  return { title: text.common.placeholderTitle };
+}

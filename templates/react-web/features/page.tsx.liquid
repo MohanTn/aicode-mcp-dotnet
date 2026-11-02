@@ -1,0 +1,13 @@
+import { Title, Wrapper } from './styledComponents';
+import type { {{ componentName | pascalCase }}Props } from './types';
+import { use{{ componentName | pascalCase }} } from './use{{ componentName | pascalCase }}';
+
+export default function {{ componentName | pascalCase }}(props: {{ componentName | pascalCase }}Props) {
+  const { title } = use{{ componentName | pascalCase }}(props);
+
+  return (
+    <Wrapper>
+      <Title>{title}</Title>
+    </Wrapper>
+  );
+}

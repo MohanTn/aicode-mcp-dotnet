@@ -1,0 +1,7 @@
+namespace {{ rootNamespace }}.Features.{{ feature }}.{{ useCase }};
+
+public class {{ useCase }}Validator
+{
+    /// <summary>Returns one message per problem. An empty list means the request is valid.</summary>
+    public IReadOnlyList<string> Validate({{ useCase }}Request request) => Array.Empty<string>();
+}

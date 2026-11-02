@@ -1,0 +1,16 @@
+using {{ rootNamespace }}.Features.{{ feature }}.{{ useCase }};
+
+namespace {{ rootNamespace }}.Tests.Features.{{ feature }};
+
+public class {{ useCase }}HandlerTests
+{
+    [Fact]
+    public async Task HandleAsync_ReturnsResponse()
+    {
+        // Arrange: build the handler with mocked interfaces only.
+        // Act: call HandleAsync.
+        // Assert: one behavior.
+        await Task.CompletedTask;
+        Assert.Fail("Write this test before implementing {{ useCase }}Handler.");
+    }
+}

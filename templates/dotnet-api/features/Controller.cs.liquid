@@ -1,0 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+
+namespace {{ rootNamespace }}.Features.{{ feature }};
+
+[ApiController]
+[Route("api/{{ feature | kebabCase }}")]
+public class {{ feature }}Controller : ControllerBase
+{
+    // One action per use case. Validate, call the handler, and translate the result to a status code. No business logic.
+}

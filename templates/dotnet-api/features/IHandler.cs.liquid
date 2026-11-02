@@ -1,0 +1,6 @@
+namespace {{ rootNamespace }}.Features.{{ feature }}.{{ useCase }};
+
+public interface I{{ useCase }}Handler
+{
+    Task<{{ useCase }}Response> HandleAsync({{ useCase }}Request request, CancellationToken cancellationToken);
+}

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>aicode-mcp</AssemblyName>
+    <RootNamespace>Aicode.Mcp.Cli</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>aicode-mcp</ToolCommandName>
+    <PackageId>Aicode.Mcp.Cli</PackageId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aicode.Mcp.Servers\Aicode.Mcp.Servers.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.*" />
+  </ItemGroup>
+</Project>

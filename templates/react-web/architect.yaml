@@ -1,0 +1,21 @@
+features:
+  - name: Page component
+    design_pattern: Page, hook and styled components split
+    includes:
+      - "src/**/page.tsx"
+    description: One default-exported function component per page.tsx. Markup and wiring only. Logic lives in the use{ComponentName} hook.
+  - name: Component hook
+    design_pattern: Logic in a hook file
+    includes:
+      - "src/**/use*.ts"
+    description: Data fetching and business logic live in the component's own hook file.
+  - name: Styled components
+    design_pattern: Themed styled-components
+    includes:
+      - "src/**/styledComponents.ts"
+    description: Named styled components prefixed by role. Colors, spacing and typography come from the theme.
+  - name: I18n text
+    design_pattern: Central text file
+    includes:
+      - "src/I18n/index.ts"
+    description: Every user-facing string is added here and read through keys.

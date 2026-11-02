@@ -1,0 +1,49 @@
+boilerplate:
+  - name: react-web
+    description: React + TypeScript + Vite app with styled-components, a theme and an I18n text file
+    variables_schema:
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: Package name, for example orders-web
+      required:
+        - projectName
+      additionalProperties: false
+    includes:
+      - "boilerplate/package.json.liquid->package.json"
+      - "boilerplate/index.html.liquid->index.html"
+      - "boilerplate/tsconfig.json->tsconfig.json"
+      - "boilerplate/vite.config.ts->vite.config.ts"
+      - "boilerplate/main.tsx->src/main.tsx"
+      - "boilerplate/theme.ts->src/theme.ts"
+      - "boilerplate/styled.d.ts->src/styled.d.ts"
+      - "boilerplate/I18n.ts->src/I18n/index.ts"
+
+features:
+  - name: add-page-component
+    description: Add a component folder (page.tsx, styledComponents.ts, types.ts, hook and a test) under a route page
+    variables_schema:
+      type: object
+      properties:
+        routePage:
+          type: string
+          description: Route page name, any case. The folder is written in snake_case, for example orders_list
+        componentName:
+          type: string
+          description: Component name, any case. The component is PascalCase and its folder is snake_case, for example OrderTable
+      required:
+        - routePage
+        - componentName
+      additionalProperties: false
+    includes:
+      - "features/page.tsx.liquid->src/{{ routePage | snakeCase }}/{{ componentName | snakeCase }}/page.tsx"
+      - "features/styledComponents.ts.liquid->src/{{ routePage | snakeCase }}/{{ componentName | snakeCase }}/styledComponents.ts"
+      - "features/types.ts.liquid->src/{{ routePage | snakeCase }}/{{ componentName | snakeCase }}/types.ts"
+      - "features/hook.ts.liquid->src/{{ routePage | snakeCase }}/{{ componentName | snakeCase }}/use{{ componentName | pascalCase }}.ts"
+      - "features/page.test.tsx.liquid->src/{{ routePage | snakeCase }}/{{ componentName | snakeCase }}/page.test.tsx"
+
+exclude:
+  - "**/package.json"
+  - "**/*.config.ts"
+  - "**/*.md"

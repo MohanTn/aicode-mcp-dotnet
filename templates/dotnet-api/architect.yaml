@@ -1,0 +1,27 @@
+features:
+  - name: Controller
+    design_pattern: Thin controller
+    includes:
+      - "Features/**/*Controller.cs"
+    description: One controller per feature. It validates input, delegates to a handler, and maps the result to a status code. No business logic.
+  - name: Handler
+    design_pattern: Use case handler
+    includes:
+      - "Features/**/*Handler.cs"
+    description: Owns the business logic of one use case. Depends on interfaces only, injected through the constructor.
+  - name: Request and response DTOs
+    design_pattern: Records as wire types
+    includes:
+      - "Features/**/*Request.cs"
+      - "Features/**/*Response.cs"
+    description: Requests and responses are their own record types. Domain entities never cross the API boundary.
+  - name: Repository
+    design_pattern: Repository behind an interface
+    includes:
+      - "Infrastructure/Repositories/**/*.cs"
+    description: Each {Entity}Repository implements I{Entity}Repository. Handlers depend on the interface.
+  - name: Domain model
+    design_pattern: Plain domain entities
+    includes:
+      - "Domain/**/*.cs"
+    description: Entities are free of EF Core and ASP.NET attributes.

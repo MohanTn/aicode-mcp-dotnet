@@ -1,0 +1,68 @@
+version: "1.0"
+template: react-web
+description: Coding rules for React + TypeScript apps
+rules:
+  - pattern: typescript-general
+    description: Rules for every TypeScript file
+    must_not_do:
+      - rule: Use the any type. Use unknown and narrow it
+    should_do:
+      - rule: Prefer type over interface for props and unions
+
+  - pattern: page
+    globs:
+      - "src/**/page.tsx"
+    description: Page components
+    inherits:
+      - typescript-general
+    must_do:
+      - rule: Export one function component as the default export and type its props with an explicit Props type
+      - rule: Read all text through the keys in src/I18n/index.ts
+    must_not_do:
+      - rule: Add a user-facing string literal to the component
+      - rule: Use an inline style prop or a CSS class string
+      - rule: Fetch data or hold business logic in page.tsx. Move it to the hook file
+      - rule: Write a class component
+
+  - pattern: hook
+    globs:
+      - "src/**/use*.ts"
+    description: Component hooks
+    inherits:
+      - typescript-general
+    must_not_do:
+      - rule: Add a user-facing string literal. Add it to src/I18n/index.ts
+      - rule: Use useEffect only to mirror one state value into another. Derive the value instead
+
+  - pattern: styled
+    globs:
+      - "src/**/styledComponents.ts"
+    description: Styled components
+    inherits:
+      - typescript-general
+    must_do:
+      - rule: Export named styled components prefixed by role, for example Wrapper, Header, ItemRow
+      - rule: Read colors, spacing and typography from the theme
+    must_not_do:
+      - rule: Hardcode a hex color
+
+  - pattern: i18n
+    globs:
+      - "src/I18n/index.ts"
+    description: Central text file
+    inherits:
+      - typescript-general
+    must_do:
+      - rule: Add every label, message, placeholder and error text here
+
+  - pattern: component-test
+    globs:
+      - "src/**/*.test.tsx"
+    description: Component tests
+    inherits:
+      - typescript-general
+    must_do:
+      - rule: Query by role or label with React Testing Library
+      - rule: Ship at least one render test and one interaction test for every component
+    must_not_do:
+      - rule: Query by test id or assert on internal state
