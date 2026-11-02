@@ -1,11 +1,14 @@
+using Aicode.Mcp.Core.Projects;
+
 namespace Aicode.Mcp.Cli;
 
 public static class InitCommand
 {
+    private const string DefaultTemplate = "dotnet-api";
+
     private const string SettingsYaml = """
         # Template folder under templates/ that new projects in this workspace follow.
         # Multi-project workspaces set sourceTemplate in each project.json instead.
-        sourceTemplate: dotnet-api
         templatesPath: templates
         scaffold-mcp:
           hook:
@@ -28,6 +31,9 @@ public static class InitCommand
     private const string HooksJson = """
         {
           "hooks": {
+            "SessionStart": [
+              { "hooks": [{ "type": "command", "command": "aicode-mcp init --quiet" }] }
+            ],
             "PreToolUse": [
               { "matcher": "Write", "hooks": [{ "type": "command", "command": "aicode-mcp hook --type scaffold" }] }
             ],
@@ -39,13 +45,37 @@ public static class InitCommand
         """;
 
     /// <summary>Creates the settings and MCP config if missing, then prints the hooks to merge into .claude/settings.json.</summary>
-    public static int Run(string directory, TextWriter output)
+    public static int Run(string directory, TextWriter output, bool printHooks = true, string? bundledTemplates = null)
     {
-        WriteIfMissing(Path.Combine(directory, ".toolkit", "settings.yaml"), SettingsYaml, output);
+        // Only fall back to the default template when no project.json or settings.yaml already names one.
+        var settings = ProjectFinder.Find(directory) is null
+            ? $"sourceTemplate: {DefaultTemplate}{Environment.NewLine}{SettingsYaml}"
+            : SettingsYaml;
+        WriteIfMissing(Path.Combine(directory, ".toolkit", "settings.yaml"), settings, output);
         WriteIfMissing(Path.Combine(directory, ".mcp.json"), McpJson, output);
-        output.WriteLine("Add this to .claude/settings.json to enable the hooks:");
-        output.WriteLine(HooksJson);
+        CopyTemplatesIfMissing(directory, bundledTemplates ?? Path.Combine(AppContext.BaseDirectory, "templates"), output);
+        if (printHooks)
+        {
+            output.WriteLine("Add this to .claude/settings.json to enable the hooks:");
+            output.WriteLine(HooksJson);
+        }
         return 0;
+    }
+
+    private static void CopyTemplatesIfMissing(string directory, string bundled, TextWriter output)
+    {
+        var target = Workspace.TemplatesPath(directory, Workspace.LoadSettings(directory));
+        if (Directory.Exists(target) || !Directory.Exists(bundled))
+        {
+            return;
+        }
+        foreach (var file in Directory.EnumerateFiles(bundled, "*", SearchOption.AllDirectories))
+        {
+            var destination = Path.Combine(target, Path.GetRelativePath(bundled, file));
+            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+            File.Copy(file, destination);
+        }
+        output.WriteLine($"Copied default templates to {target}");
     }
 
     private static void WriteIfMissing(string path, string content, TextWriter output)

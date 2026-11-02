@@ -69,6 +69,34 @@ public class CliCommandTests
     }
 
     [Fact]
+    public void Init_CopiesBundledTemplatesAndSetsTheDefaultWhenNoneIsConfigured()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+        workspace.Write("bundled/dotnet-api/scaffold.yaml", "x: 1");
+
+        InitCommand.Run(directory, new StringWriter(), printHooks: false, bundledTemplates: workspace.PathOf("bundled"));
+
+        Assert.Contains("sourceTemplate: dotnet-api", File.ReadAllText(Path.Combine(directory, ".toolkit", "settings.yaml")));
+        Assert.True(File.Exists(Path.Combine(directory, "templates", "dotnet-api", "scaffold.yaml")));
+    }
+
+    [Fact]
+    public void Init_KeepsAProjectTemplateAndExistingTemplates()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+        workspace.Write("project/project.json", "{ \"sourceTemplate\": \"react-web\" }");
+        workspace.Write("project/templates/mine.yaml", "mine");
+        workspace.Write("bundled/dotnet-api/scaffold.yaml", "x: 1");
+
+        InitCommand.Run(directory, new StringWriter(), printHooks: false, bundledTemplates: workspace.PathOf("bundled"));
+
+        Assert.DoesNotContain("sourceTemplate:", File.ReadAllText(Path.Combine(directory, ".toolkit", "settings.yaml")));
+        Assert.False(Directory.Exists(Path.Combine(directory, "templates", "dotnet-api")));
+    }
+
+    [Fact]
     public async Task McpServe_RejectsAnUnknownServer()
     {
         Assert.Equal(1, await McpServeCommand.RunAsync(new[] { "mcp-serve", "--server", "nope" }));

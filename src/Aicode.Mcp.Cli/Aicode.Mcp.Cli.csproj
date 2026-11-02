@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Aicode.Mcp.Servers\Aicode.Mcp.Servers.csproj" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.*" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Bundle the default templates with the tool so init can copy them into new repos. -->
+    <Content Include="..\..\templates\**\*" Link="templates\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -11,8 +11,9 @@ public static class CliApp
               reviewer also needs: --gitlab-token-env <ENV_VAR_NAME> [--gitlab-url https://gitlab.com]
           hook --type scaffold|architect
               Claude Code hook. Reads the hook JSON from stdin and writes the result to stdout.
-          init
-              Create .toolkit/settings.yaml and .mcp.json, and print the hooks to add to .claude/settings.json.
+          init [--quiet]
+              Create .toolkit/settings.yaml (default template if none is configured), .mcp.json and a templates/ copy.
+              Prints the hooks to add to .claude/settings.json unless --quiet (use --quiet from a SessionStart hook).
         """;
 
     public static async Task<int> RunAsync(string[] args)
@@ -24,7 +25,7 @@ public static class CliApp
             case "hook":
                 return await HookCommand.RunAsync(args);
             case "init":
-                return InitCommand.Run(Directory.GetCurrentDirectory(), Console.Out);
+                return InitCommand.Run(Directory.GetCurrentDirectory(), Console.Out, printHooks: !args.Contains("--quiet"));
             default:
                 Console.Error.WriteLine(Usage);
                 return args.Length == 0 || args[0] is "-h" or "--help" or "help" ? 0 : 1;
