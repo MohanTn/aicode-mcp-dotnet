@@ -97,6 +97,68 @@ public class CliCommandTests
     }
 
     [Fact]
+    public void Init_UsesTheRequestedTemplateWhenNoneIsConfigured()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+        workspace.Write("bundled/react-web/scaffold.yaml", "x: 1");
+
+        var exitCode = InitCommand.Run(directory, new StringWriter(), printHooks: false, bundledTemplates: workspace.PathOf("bundled"), template: "react-web");
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("sourceTemplate: react-web", File.ReadAllText(Path.Combine(directory, ".toolkit", "settings.yaml")));
+    }
+
+    [Fact]
+    public void Init_RejectsAnUnknownTemplateAndWritesNothing()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+        workspace.Write("bundled/dotnet-api/scaffold.yaml", "x: 1");
+        var output = new StringWriter();
+
+        var exitCode = InitCommand.Run(directory, output, bundledTemplates: workspace.PathOf("bundled"), template: "nope");
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("Bundled templates: dotnet-api", output.ToString());
+        Assert.False(Directory.Exists(Path.Combine(directory, ".toolkit")));
+    }
+
+    [Fact]
+    public void Init_IgnoresTheRequestedTemplateWhenTheProjectNamesOne()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+        workspace.Write("project/project.json", "{ \"sourceTemplate\": \"dotnet-api\" }");
+        workspace.Write("bundled/react-web/scaffold.yaml", "x: 1");
+
+        InitCommand.Run(directory, new StringWriter(), printHooks: false, bundledTemplates: workspace.PathOf("bundled"), template: "react-web");
+
+        Assert.DoesNotContain("sourceTemplate:", File.ReadAllText(Path.Combine(directory, ".toolkit", "settings.yaml")));
+    }
+
+    [Fact]
+    public void Init_CanSkipTheMcpConfig()
+    {
+        using var workspace = new TestWorkspace(sourceTemplate: null);
+        var directory = workspace.PathOf("project");
+
+        InitCommand.Run(directory, new StringWriter(), printHooks: false, writeMcpJson: false);
+
+        Assert.False(File.Exists(Path.Combine(directory, ".mcp.json")));
+        Assert.True(File.Exists(Path.Combine(directory, ".toolkit", "settings.yaml")));
+    }
+
+    [Theory]
+    [InlineData("scaffold", "use-scaffold-method")]
+    [InlineData("architect", "review-code-change")]
+    [InlineData("reviewer", "post-review-comments")]
+    public void McpServe_InstructionsNameTheWorkflowTools(string server, string tool)
+    {
+        Assert.Contains(tool, McpServeCommand.Instructions(server));
+    }
+
+    [Fact]
     public async Task McpServe_RejectsAnUnknownServer()
     {
         Assert.Equal(1, await McpServeCommand.RunAsync(new[] { "mcp-serve", "--server", "nope" }));

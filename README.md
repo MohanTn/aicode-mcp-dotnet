@@ -34,7 +34,12 @@ dotnet tool install --global --add-source nupkg Aicode.Mcp.Cli
 cd your-project && aicode-mcp init
 ```
 
-`init` writes `.toolkit/settings.yaml` and `.mcp.json`, then prints the hooks to add to `.claude/settings.json`. Copy the template folders you need into your project's `templates/` folder.
+`init` writes `.toolkit/settings.yaml` and `.mcp.json`, copies the bundled templates into `templates/`, then prints the hooks to add to `.claude/settings.json`. Existing files are kept.
+
+- `--template react-web` picks the template when the repo has none yet. The default is `dotnet-api`.
+- `--quiet` is for a SessionStart hook on a machine that registers the servers user-wide. It skips `.mcp.json` and the hook printout.
+
+Each server sends MCP instructions at startup that describe its workflow, so agents know the tool order without extra prompting.
 
 A project is tied to a template by `sourceTemplate` in its `project.json`, or in `.toolkit/settings.yaml` for single-project repos.
 

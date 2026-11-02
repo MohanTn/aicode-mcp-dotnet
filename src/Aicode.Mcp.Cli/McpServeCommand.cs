@@ -24,7 +24,9 @@ public static class McpServeCommand
         builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
         builder.Services.AddAicodeCore();
 
-        var mcp = builder.Services.AddMcpServer().WithStdioServerTransport();
+        var mcp = builder.Services
+            .AddMcpServer(options => options.ServerInstructions = Instructions(server))
+            .WithStdioServerTransport();
         switch (server)
         {
             case "scaffold":
@@ -50,4 +52,21 @@ public static class McpServeCommand
         await builder.Build().RunAsync();
         return 0;
     }
+
+    /// <summary>Workflow sent to the client at initialize, so agents use the tools without a hook having to teach them.</summary>
+    public static string Instructions(string server) => server switch
+    {
+        "scaffold" =>
+            "Generate code from the repo's templates instead of hand-writing boilerplate. " +
+            "A project follows the template named by sourceTemplate in project.json or .toolkit/settings.yaml. " +
+            "New project: list-boilerplates, then use-boilerplate. " +
+            "New file or feature in an existing project: list-scaffolding-methods with the project path, then use-scaffold-method, " +
+            "then replace the placeholder bodies in the created files. Write a file by hand only when no method fits.",
+        "architect" =>
+            "Before editing a file call get-file-design-pattern to get its design patterns and rules. " +
+            "After editing call review-code-change and fix every must_do and must_not_do violation it lists.",
+        _ =>
+            "Check out the merge request branch, then call review-merge-request. " +
+            "Review each diff against the rules returned for it, then call post-review-comments with your findings.",
+    };
 }

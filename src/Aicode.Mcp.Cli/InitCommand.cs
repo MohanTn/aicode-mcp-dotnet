@@ -44,16 +44,37 @@ public static class InitCommand
         }
         """;
 
-    /// <summary>Creates the settings and MCP config if missing, then prints the hooks to merge into .claude/settings.json.</summary>
-    public static int Run(string directory, TextWriter output, bool printHooks = true, string? bundledTemplates = null)
+    /// <summary>
+    /// Creates the settings and MCP config if missing, then prints the hooks to merge into .claude/settings.json.
+    /// <paramref name="template"/> replaces the default template, and is ignored when a project already names one.
+    /// Skip .mcp.json with <paramref name="writeMcpJson"/> when the servers are registered user-wide.
+    /// </summary>
+    public static int Run(
+        string directory,
+        TextWriter output,
+        bool printHooks = true,
+        string? bundledTemplates = null,
+        string? template = null,
+        bool writeMcpJson = true)
     {
+        bundledTemplates ??= Path.Combine(AppContext.BaseDirectory, "templates");
+        if (template is not null && Directory.Exists(bundledTemplates) && !Directory.Exists(Path.Combine(bundledTemplates, template)))
+        {
+            var known = string.Join(", ", Directory.EnumerateDirectories(bundledTemplates).Select(Path.GetFileName).Order());
+            output.WriteLine($"Unknown template '{template}'. Bundled templates: {known}");
+            return 1;
+        }
+
         // Only fall back to the default template when no project.json or settings.yaml already names one.
         var settings = ProjectFinder.Find(directory) is null
-            ? $"sourceTemplate: {DefaultTemplate}{Environment.NewLine}{SettingsYaml}"
+            ? $"sourceTemplate: {template ?? DefaultTemplate}{Environment.NewLine}{SettingsYaml}"
             : SettingsYaml;
         WriteIfMissing(Path.Combine(directory, ".toolkit", "settings.yaml"), settings, output);
-        WriteIfMissing(Path.Combine(directory, ".mcp.json"), McpJson, output);
-        CopyTemplatesIfMissing(directory, bundledTemplates ?? Path.Combine(AppContext.BaseDirectory, "templates"), output);
+        if (writeMcpJson)
+        {
+            WriteIfMissing(Path.Combine(directory, ".mcp.json"), McpJson, output);
+        }
+        CopyTemplatesIfMissing(directory, bundledTemplates, output);
         if (printHooks)
         {
             output.WriteLine("Add this to .claude/settings.json to enable the hooks:");
