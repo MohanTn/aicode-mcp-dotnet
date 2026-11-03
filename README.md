@@ -245,6 +245,8 @@ A project is tied to a template by `sourceTemplate` in its `project.json`, or in
 
 Set an environment variable to a GitLab access token with the `api` scope. Pass its name to the server with `--gitlab-token-env <NAME>`, and optionally `--gitlab-url` for self-hosted GitLab. Check out the merge request branch, then ask the agent to call `review-merge-request`. It returns each diff with the rules for its template. The agent reviews, then calls `post-review-comments`.
 
+`aicode-mcp review-context <file>...` prints the same lookup as JSON for other tools, with no token needed. For each file it gives the RULES.yaml rules, the architect.yaml patterns, and the scaffold.yaml feature `.liquid` file the path would have come from. Files with no match are left out. pipeline-worker's `reviewTemplates` setting uses it.
+
 ### Hooks
 
 - `aicode-mcp hook --type scaffold` (PreToolUse on Write): the first Write of a new file is denied once with the scaffold methods that fit. Repeating the Write goes through.

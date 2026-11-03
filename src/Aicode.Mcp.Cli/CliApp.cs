@@ -20,6 +20,9 @@ public static class CliApp
               Register scaffold-mcp and architect-mcp user-wide in Claude Code, Copilot CLI and Pi,
               add the Claude Code hooks and install the aicode-init and repo-template skills.
               --remove takes them out again.
+          review-context <file>...
+              Print JSON with the RULES.yaml rules, architect.yaml patterns and scaffold.yaml feature
+              template that apply to each file (paths relative to the current directory).
         """;
 
     public static async Task<int> RunAsync(string[] args)
@@ -43,6 +46,8 @@ public static class CliApp
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     Console.Out,
                     remove: args.Contains("--remove"));
+            case "review-context":
+                return ReviewContextCommand.Run(Directory.GetCurrentDirectory(), args.Skip(1).ToList(), Console.Out);
             default:
                 Console.Error.WriteLine(Usage);
                 return args.Length == 0 || args[0] is "-h" or "--help" or "help" ? 0 : 1;
