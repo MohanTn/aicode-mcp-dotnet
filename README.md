@@ -12,8 +12,9 @@ Three MCP servers and a Claude Code hook runner for .NET and React projects, shi
 
 - `src/Aicode.Mcp.Core`: YAML models, glob matching, project and rule lookup, scaffold rendering (Liquid via Fluid), hooks, GitLab client
 - `src/Aicode.Mcp.Servers`: MCP tool classes
-- `src/Aicode.Mcp.Cli`: the `aicode-mcp` tool (`mcp-serve`, `hook`, `init`)
+- `src/Aicode.Mcp.Cli`: the `aicode-mcp` tool (`mcp-serve`, `hook`, `init`, `setup`)
 - `templates/dotnet-api`, `templates/react-web`: `scaffold.yaml`, `architect.yaml`, `RULES.yaml` and template files
+- `skills/aicode-init`, `skills/repo-template`: agent skills that `setup` installs for Claude Code, Copilot CLI and Pi
 - `tests/Aicode.Mcp.Tests`: xUnit tests. They copy the real `templates/` folder into a temp workspace
 
 ## Build and test
@@ -26,18 +27,55 @@ dotnet test aicode-mcp-dotnet.slnx
 
 `McpProtocolTests` starts the real `aicode-mcp` process for each server and calls all 9 tools over stdio. The reviewer talks to a fake GitLab served from the test. `ToolCatalogTests` fails if a tool is added or renamed without updating the suite.
 
-## Use it
+## Install
+
+There are two ways in. Pick one, not both.
+
+### Option A: with mohan-dotfiles (everything automatic)
+
+If you use [mohan-dotfiles](https://github.com/MohanTn/mohan-dotfiles), answer yes to "9b. Set up the aicode-mcp MCP servers" in `./setup-packages.sh`, then run `./setup.sh`. It clones this repo to `~/.local/share/aicode-mcp-dotnet`, builds it, rebuilds on every pull, registers the servers and hooks for Claude Code, Copilot CLI and Pi, and initialises .NET and React repos at session start. Nothing below is needed.
+
+### Option B: standalone
+
+Needs the .NET 10 SDK and git. Pi also needs an MCP extension that reads `~/.pi/agent/mcp.json` (for example `pi-mcp-adapter`).
 
 ```bash
+git clone https://github.com/MohanTn/aicode-mcp-dotnet && cd aicode-mcp-dotnet
 dotnet pack src/Aicode.Mcp.Cli -o nupkg
 dotnet tool install --global --add-source nupkg Aicode.Mcp.Cli
-cd your-project && aicode-mcp init
+aicode-mcp setup
 ```
 
-`init` writes `.toolkit/settings.yaml` and `.mcp.json`, copies the bundled templates into `templates/`, then prints the hooks to add to `.claude/settings.json`. Existing files are kept.
+Make sure `~/.dotnet/tools` is on your `PATH`. `aicode-mcp setup` configures every harness whose folder exists (`~/.claude`, `~/.copilot`, `~/.pi/agent`) and reports the ones it skipped:
+
+| | Claude Code | Copilot CLI | Pi |
+| --- | --- | --- | --- |
+| `scaffold-mcp`, `architect-mcp` | `claude mcp add --scope user` | `~/.copilot/mcp-config.json` | `~/.pi/agent/mcp.json` |
+| scaffold and architect hooks | `~/.claude/settings.json` | | |
+| `aicode-init`, `repo-template` skills | `~/.claude/skills` | `~/.copilot/skills` | `~/.pi/agent/skills` |
+
+Re-running `setup` refreshes everything without duplicates. Other servers, hooks and skills are left alone. `aicode-mcp setup --remove` takes out only what setup added.
+
+To update: `git pull`, run `dotnet pack` again, then `dotnet tool uninstall --global Aicode.Mcp.Cli` and install it again, then `aicode-mcp setup`.
+
+## Set up a repo
+
+Open the repo in your agent and run the `aicode-init` command:
+
+| Claude Code | Copilot CLI | Pi |
+| --- | --- | --- |
+| `/aicode-init` | ask it to use the `aicode-init` skill | `/skill:aicode-init` |
+
+It picks `dotnet-api` or `react-web` from the stack, runs `aicode-mcp init`, and checks the scaffold tools respond. A repo that already has more than 10 source files is brownfield. The generic template would fight its architecture, so it offers `repo-template` instead (`/repo-template`, `/skill:repo-template`), which builds `templates/<name>/` from the patterns the repo already follows.
+
+Restart the agent session after the first setup so it loads the MCP servers.
+
+### By hand, without setup
+
+`aicode-mcp init` in a repo writes `.toolkit/settings.yaml` and `.mcp.json`, copies the bundled templates into `templates/`, then prints the hooks to add to `.claude/settings.json`. Existing files are kept. This is enough for Claude Code in that one repo.
 
 - `--template react-web` picks the template when the repo has none yet. The default is `dotnet-api`.
-- `--quiet` is for a SessionStart hook on a machine that registers the servers user-wide. It skips `.mcp.json` and the hook printout.
+- `--quiet` is for when the servers are registered user-wide (setup or the dotfiles). It skips `.mcp.json` and the hook printout.
 
 Each server sends MCP instructions at startup that describe its workflow, so agents know the tool order without extra prompting.
 

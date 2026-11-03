@@ -14,5 +14,7 @@
   <ItemGroup>
     <!-- Bundle the default templates with the tool so init can copy them into new repos. -->
     <Content Include="..\..\templates\**\*" Link="templates\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Bundle the agent skills so setup can install them for Claude Code, Copilot CLI and Pi. -->
+    <Content Include="..\..\skills\**\*" Link="skills\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
